@@ -176,7 +176,8 @@ def render(
         except Exception as e:
             fail(f"Render never completed (timeout): {e}")
 
-        # Screenshot the SVG element
+        # Screenshot the SVG element. The template expands the SVG's viewBox
+        # before rendering so font ascenders/descenders aren't clipped.
         svg_el = page.query_selector("#root svg")
         if svg_el is None:
             fail("No SVG element found after render.")

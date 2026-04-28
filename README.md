@@ -68,6 +68,12 @@ Claude should auto-discover the skill. If not, confirm that `SKILL.md` is reacha
 
 The skill handles concept mapping, layout, JSON generation, and (in Claude Code) visual validation.
 
+## Example output
+
+The diagram below was generated end-to-end by the skill from the prompt above and rendered via the Playwright pipeline. Source: [`examples/oauth-flow.excalidraw`](examples/oauth-flow.excalidraw).
+
+![OAuth 2.0 authorization code flow](examples/oauth-flow.png)
+
 ## Customize colors
 
 Edit `references/color-palette.md` to match your brand. Everything else is universal design methodology.

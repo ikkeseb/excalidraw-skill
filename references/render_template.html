@@ -36,6 +36,20 @@
           files: files,
         });
 
+        // Excalidraw's SVG viewBox is tight to element bounds, so font ascenders
+        // and descenders on edge elements get clipped. Expand viewBox + width/height
+        // by a fixed pad so the screenshot includes breathing room.
+        const PAD = 16;
+        const vb = svg.getAttribute("viewBox");
+        if (vb) {
+          const [x, y, w, h] = vb.split(/\s+/).map(Number);
+          svg.setAttribute("viewBox", `${x - PAD} ${y - PAD} ${w + 2 * PAD} ${h + 2 * PAD}`);
+          const svgW = parseFloat(svg.getAttribute("width") || w);
+          const svgH = parseFloat(svg.getAttribute("height") || h);
+          svg.setAttribute("width", String(svgW + 2 * PAD));
+          svg.setAttribute("height", String(svgH + 2 * PAD));
+        }
+
         // Clear any previous render
         const root = document.getElementById("root");
         root.innerHTML = "";
