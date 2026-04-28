@@ -11,9 +11,9 @@ Generate `.excalidraw` JSON files that **argue visually**, not just display info
 
 This skill works in both Claude Code and Claude Chat.
 
-**Claude Code** (`/.claude/skills/`): Full render-validate loop available via Playwright. After generating JSON, render to PNG, view it, and fix issues iteratively. See `references/render_excalidraw.py`.
+**Claude Code** (`~/.claude/skills/excalidraw/` or `<project>/.claude/skills/excalidraw/`): Full render-validate loop available via Playwright. After generating JSON, render to PNG, view it, and fix issues iteratively. See `references/render_excalidraw.py`.
 
-**Claude Chat** (`/mnt/skills/user/`): Create the `.excalidraw` JSON file and save to `/mnt/user-data/outputs/`. The user opens it in [excalidraw.com](https://excalidraw.com) or the Excalidraw desktop app. No render loop — get it right by following the methodology carefully.
+**Claude Chat** (`/mnt/skills/user/excalidraw/`): Create the `.excalidraw` JSON file and save to `/mnt/user-data/outputs/`. The user opens it in [excalidraw.com](https://excalidraw.com) or the Excalidraw desktop app. No render loop — get it right by following the methodology carefully.
 
 **First-time setup (Claude Code only):**
 ```bash
