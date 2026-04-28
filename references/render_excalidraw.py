@@ -137,11 +137,30 @@ def render(
             device_scale_factor=scale,
         )
 
+        # Capture browser-side diagnostics so failures (CDN 404s, JS errors,
+        # CSP blocks) surface in stderr instead of presenting as a silent timeout.
+        diagnostics: list[str] = []
+        page.on("console", lambda msg: diagnostics.append(f"[console.{msg.type}] {msg.text}"))
+        page.on("pageerror", lambda exc: diagnostics.append(f"[pageerror] {exc}"))
+        page.on("requestfailed", lambda req: diagnostics.append(f"[requestfailed] {req.url} — {req.failure}"))
+
+        def fail(msg: str) -> None:
+            print(f"ERROR: {msg}", file=sys.stderr)
+            if diagnostics:
+                print("Browser diagnostics:", file=sys.stderr)
+                for line in diagnostics:
+                    print(f"  {line}", file=sys.stderr)
+            browser.close()
+            sys.exit(1)
+
         # Load the template
         page.goto(template_url)
 
         # Wait for the ES module to load (imports from esm.sh)
-        page.wait_for_function("window.__moduleReady === true", timeout=30000)
+        try:
+            page.wait_for_function("window.__moduleReady === true", timeout=30000)
+        except Exception as e:
+            fail(f"Template module never became ready (timeout): {e}")
 
         # Inject the diagram data and render
         json_str = json.dumps(data)
@@ -149,19 +168,18 @@ def render(
 
         if not result or not result.get("success"):
             error_msg = result.get("error", "Unknown render error") if result else "renderDiagram returned null"
-            print(f"ERROR: Render failed: {error_msg}", file=sys.stderr)
-            browser.close()
-            sys.exit(1)
+            fail(f"Render failed: {error_msg}")
 
         # Wait for render completion signal
-        page.wait_for_function("window.__renderComplete === true", timeout=15000)
+        try:
+            page.wait_for_function("window.__renderComplete === true", timeout=15000)
+        except Exception as e:
+            fail(f"Render never completed (timeout): {e}")
 
         # Screenshot the SVG element
         svg_el = page.query_selector("#root svg")
         if svg_el is None:
-            print("ERROR: No SVG element found after render.", file=sys.stderr)
-            browser.close()
-            sys.exit(1)
+            fail("No SVG element found after render.")
 
         svg_el.screenshot(path=str(output_path))
         browser.close()
