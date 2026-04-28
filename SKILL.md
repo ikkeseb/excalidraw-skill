@@ -11,7 +11,7 @@ Generate `.excalidraw` JSON files that **argue visually**, not just display info
 
 This skill works in both Claude Code and Claude Chat.
 
-**Claude Code** (`~/.claude/skills/excalidraw/` or `<project>/.claude/skills/excalidraw/`): Full render-validate loop available via Playwright. After generating JSON, render to PNG, view it, and fix issues iteratively. See `references/render_excalidraw.py`.
+**Claude Code** (`~/.claude/skills/excalidraw/` or `<project>/.claude/skills/excalidraw/`): Full render-validate loop available via Playwright. After generating JSON, render to PNG, view it, and fix issues iteratively. See `references/render_excalidraw.py`. After delivery, offer to open the diagram in Excalidraw via clipboard + browser — see `references/open_in_excalidraw.py`.
 
 **Claude Chat** (`/mnt/skills/user/excalidraw/`): Create the `.excalidraw` JSON file and save to `/mnt/user-data/outputs/`. The user opens it in [excalidraw.com](https://excalidraw.com) or the Excalidraw desktop app. No render loop — get it right by following the methodology carefully.
 
@@ -83,6 +83,9 @@ Only now create the Excalidraw elements. For large diagrams, build section-by-se
 
 ### Step 6: Render & Validate (Claude Code only — MANDATORY)
 Run the render-view-fix loop. See Render & Validate section.
+
+### Step 7: Offer to Open in Excalidraw (Claude Code only)
+Once the diagram is delivered, offer to open it on excalidraw.com so the user can interact with it without leaving their flow. See Open in Excalidraw section.
 
 ---
 
@@ -234,6 +237,30 @@ cd <skill-path>/references && uv run python render_excalidraw.py <path-to-file.e
 4. **Fix** — Edit JSON. Widen containers, adjust coordinates, add arrow waypoints, reposition labels
 5. **Re-render & re-view**
 6. **Repeat** — Typically 2-4 iterations. Stop when it passes both vision and defect checks.
+
+---
+
+## Open in Excalidraw (Claude Code only)
+
+After delivering the file, **offer** to open it in Excalidraw — don't run it automatically (the user might not want their clipboard hijacked or a browser tab spawned). Phrase the offer as a one-liner like:
+
+> Want me to open this in Excalidraw? I'll copy the JSON to your clipboard and open excalidraw.com — paste it on the canvas with Cmd+V (macOS) or Ctrl+V (Linux/Windows).
+
+If the user agrees, run:
+
+```bash
+python <skill-path>/references/open_in_excalidraw.py <path-to-file.excalidraw>
+```
+
+The script is pure stdlib (no `uv` needed). It copies the JSON to the system clipboard via the platform-native tool — `pbcopy` on macOS, `clip` on Windows, `wl-copy`/`xclip`/`xsel` on Linux — and opens [excalidraw.com](https://excalidraw.com) in the default browser. The user pastes onto the canvas to import the scene.
+
+Then surface the link and the paste hint in your reply, e.g.:
+
+> JSON copied to clipboard. Open: https://excalidraw.com — paste with Cmd+V on the canvas.
+
+**Why paste instead of auto-load?** Excalidraw can't fetch local files via URL (browser security), and `#json=`-style share links would require uploading the diagram to Excalidraw's backend. Clipboard paste keeps the diagram local and is the closest "one click" alternative.
+
+**Skip this step in Claude Chat** — the user already has the file via the chat UI and opens it themselves.
 
 ---
 

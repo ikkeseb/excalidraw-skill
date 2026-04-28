@@ -31,6 +31,8 @@ Ask Claude to diagram something:
 
 > "Diagram our microservices with a message queue between them"
 
+After delivery, Claude offers to open the diagram in Excalidraw — it copies the JSON to your clipboard and opens [excalidraw.com](https://excalidraw.com) so you can paste it onto the canvas. No upload, no third party.
+
 Methodology and design rules live in [SKILL.md](SKILL.md). Color tokens in [`references/color-palette.md`](references/color-palette.md) — edit to rebrand.
 
 ---
